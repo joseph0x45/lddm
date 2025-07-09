@@ -14,7 +14,7 @@ func NewUIHandler(templateFS *embed.FS) *UIHandler {
 	return &UIHandler{templateFS: templateFS}
 }
 
-func (h *UIHandler) RenderLoginPage(w http.ResponseWriter, r *http.Request) {
+func (h *UIHandler) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFS(h.templateFS, "templates/login.html"))
   tmpl.Execute(w, nil)
 }

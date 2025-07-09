@@ -17,19 +17,16 @@ import (
 //go:embed static/*
 var staticFiles embed.FS
 
-//go:embed templates/*
-var templatesFS embed.FS
-
 func getDBConnection() *sqlx.DB {
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
-		panic("Could not find DB URL")
+		dbURL = "db.sqlite"
 	}
 	db, err := sqlx.Connect("sqlite3", dbURL)
 	if err != nil {
 		panic(err)
 	}
-	log.Println("[INFO] Connected to Database")
+  log.Println("[INFO] Connected to Database:", dbURL)
 	return db
 }
 
@@ -45,14 +42,11 @@ func main() {
 
 	productsHandler := handlers.NewProductHandler(productsRepo)
 
-	uiHandler := handlers.NewUIHandler(&templatesFS)
-
 	mux := http.NewServeMux()
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticContent))))
-	mux.HandleFunc("POST /products", productsHandler.CreateProduct)
-	mux.HandleFunc("GET /products", productsHandler.GetAllProducts)
+	mux.Handle("/", http.FileServer(http.FS(staticContent)))
+	mux.HandleFunc("POST /api/products", productsHandler.CreateProduct)
+	mux.HandleFunc("GET /api/products", productsHandler.GetAllProducts)
 
-	mux.HandleFunc("GET /login", uiHandler.RenderLoginPage)
 
 	server := http.Server{
 		Addr:         ":8080",

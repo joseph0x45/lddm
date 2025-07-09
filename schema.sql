@@ -1,7 +1,3 @@
-drop table if exists products;
-drop table if exists orders;
-drop table if exists order_items;
-
 create table if not exists products (
   id text not null primary key,
   name text not null,
