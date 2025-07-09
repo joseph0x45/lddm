@@ -1,6 +1,8 @@
 package main
 
 import (
+	"embed"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +13,12 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+//go:embed static/*
+var staticFiles embed.FS
+
+//go:embed templates/*
+var templatesFS embed.FS
 
 func getDBConnection() *sqlx.DB {
 	dbURL := os.Getenv("DB_URL")
@@ -27,14 +35,24 @@ func getDBConnection() *sqlx.DB {
 
 func main() {
 	db := getDBConnection()
+	staticContent, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		log.Println("[ERROR] Error while loading static files")
+		panic(err)
+	}
 
 	productsRepo := repo.NewProductRepo(db)
 
 	productsHandler := handlers.NewProductHandler(productsRepo)
 
+	uiHandler := handlers.NewUIHandler(&templatesFS)
+
 	mux := http.NewServeMux()
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticContent))))
 	mux.HandleFunc("POST /products", productsHandler.CreateProduct)
 	mux.HandleFunc("GET /products", productsHandler.GetAllProducts)
+
+	mux.HandleFunc("GET /login", uiHandler.RenderLoginPage)
 
 	server := http.Server{
 		Addr:         ":8080",
