@@ -39,13 +39,18 @@ func main() {
 	}
 
 	productsRepo := repo.NewProductRepo(db)
+  ordersRepo := repo.NewOrderRepo(db)
 
 	productsHandler := handlers.NewProductHandler(productsRepo)
+  
+  ordersHandler := handlers.NewOrderHandler(ordersRepo)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.FS(staticContent)))
 	mux.HandleFunc("POST /api/products", productsHandler.CreateProduct)
 	mux.HandleFunc("GET /api/products", productsHandler.GetAllProducts)
+  mux.HandleFunc("POST /api/orders", ordersHandler.SaveOrder)
+  mux.HandleFunc("GET /api/orders", ordersHandler.GetAllOrders)
 
 
 	server := http.Server{

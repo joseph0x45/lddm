@@ -10,7 +10,11 @@ create table if not exists orders (
   id text not null primary key,
   issued_at text not null,
   customer_name text not null,
-  total int not null
+  customer_phone text not null,
+  customer_address text not null,
+  discount integer not null,
+  total integer not null,
+  total_with_discount integer not null
 );
 
 create table if not exists order_items (
