@@ -34,16 +34,6 @@
         </div>
 
         <div>
-          <label class="block mb-1 font-medium">Wholesale Price</label>
-          <input type="number" x-model.number="wholesale_price" min="0" step="25" class="w-full border p-2 rounded" />
-        </div>
-
-        <div>
-          <label class="block mb-1 font-medium">Quantity in Stock</label>
-          <input type="number" x-model.number="quantity" min="0" class="w-full border p-2 rounded" />
-        </div>
-
-        <div>
           <label class="block mb-1 font-medium">Description</label>
           <textarea x-model="description" rows="4" class="w-full border p-2 rounded"></textarea>
         </div>
@@ -72,8 +62,6 @@
       return {
         name: '',
         price: 0,
-        wholesale_price: 0,
-        quantity: 0,
         description: '',
         imageUrl: '',
 
@@ -81,8 +69,6 @@
           const payload = {
             name: this.name,
             price: this.price,
-            wholesale_price: this.wholesale_price,
-            quantity: this.quantity,
             description: this.description,
             image: this.imageUrl,
           }
@@ -104,9 +90,7 @@
             alert("Product created successfully!")
             this.name = ""
             this.price = 0
-            this.wholesale_price = 0
-            this.quantity = 0
-            this.description = 0
+            this.description = ""
             this.imageUrl = ""
           } catch (error) {
             console.error('Error:', error)

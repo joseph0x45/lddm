@@ -20,12 +20,10 @@ func NewProductHandler(repo *repo.ProductRepo) *ProductHandler {
 
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	payload := &struct {
-		Name            string `json:"name"`
-		Price           int    `json:"price"`
-		WholesalePrice  int    `json:"wholesale_price"`
-		Image           string `json:"image"`
-		QuantityInStock int    `json:"quantity_in_stock"`
-		Description     string `json:"description"`
+		Name           string `json:"name"`
+		Price          int    `json:"price"`
+		Image          string `json:"image"`
+		Description    string `json:"description"`
 	}{}
 	err := json.NewDecoder(r.Body).Decode(payload)
 	if err != nil {
@@ -34,13 +32,11 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	product := &models.Product{
-		ID:              uuid.NewString(),
-		Name:            payload.Name,
-		Price:           payload.Price,
-		WholesalePrice:  payload.WholesalePrice,
-		Image:           payload.Image,
-		QuantityInStock: payload.QuantityInStock,
-		Description:     payload.Description,
+		ID:             uuid.NewString(),
+		Name:           payload.Name,
+		Price:          payload.Price,
+		Image:          payload.Image,
+		Description:    payload.Description,
 	}
 	err = h.repo.InsertProduct(product)
 	if err != nil {

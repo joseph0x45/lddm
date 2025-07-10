@@ -2,9 +2,7 @@ create table if not exists products (
   id text not null primary key,
   name text not null,
   price integer not null,
-  wholesale_price integer not null,
   image text not null,
-  quantity_in_stock int not null,
   description text not null
 );
 

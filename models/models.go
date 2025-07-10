@@ -6,9 +6,7 @@ type Product struct {
 	ID              string `json:"id" db:"id"`
 	Name            string `json:"name" db:"name"`
 	Price           int    `json:"price" db:"price"`
-	WholesalePrice  int    `json:"wholesale_price" db:"wholesale_price"`
 	Image           string `json:"image" db:"image"`
-	QuantityInStock int    `json:"quantity_in_stock" db:"quantity_in_stock"`
 	Description     string `json:"description" db:"description"`
 }
 
@@ -30,9 +28,7 @@ type OrderItem struct {
 type ProductUpdateData struct {
 	Name            string `json:"name"`
 	Price           int    `json:"price"`
-	WholesalePrice  int    `json:"wholesale_price"`
 	Image           string `json:"image"`
-	QuantityInStock int    `json:"quantity_in_stock"`
 	Description     string `json:"description"`
 }
 

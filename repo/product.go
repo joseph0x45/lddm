@@ -17,14 +17,12 @@ func NewProductRepo(db *sqlx.DB) *ProductRepo {
 func (r *ProductRepo) InsertProduct(product *models.Product) error {
 	const query = `
     insert into products (
-      id, name, price, wholesale_price,
-      image, quantity_in_stock,
-      description
+      id, name, price,
+      image, description
     )
     values (
-      :id, :name, :price, :wholesale_price,
-      :image, :quantity_in_stock,
-      :description
+      :id, :name, :price,
+      :image, :description
     );
   `
 	_, err := r.db.NamedExec(query, product)
