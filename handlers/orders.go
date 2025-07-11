@@ -3,16 +3,20 @@ package handlers
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"server/models"
 	"server/repo"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/kenshaw/escpos"
 )
+
+const MAX_CHARS_PER_LINE = 32
 
 type OrderHandler struct {
 	orders *repo.OrderRepo
@@ -22,10 +26,39 @@ func NewOrderHandler(orders *repo.OrderRepo) *OrderHandler {
 	return &OrderHandler{orders: orders}
 }
 
+func formatFrenchDate(raw string) string {
+	t, err := time.Parse("2006-01-02 15:04:05.000000000 -0700 MST", raw)
+	if err != nil {
+		return "Date invalide"
+	}
+
+	months := [...]string{
+		"janvier", "fevrier", "mars", "avril", "mai", "juin",
+		"juillet", "aout", "septembre", "octobre", "novembre", "decembre",
+	}
+
+	day := t.Day()
+	month := months[t.Month()-1]
+	year := t.Year()
+	hour := t.Hour()
+	minute := t.Minute()
+
+	return fmt.Sprintf("%d %s %d a %02d:%02d", day, month, year, hour, minute)
+}
+
+func printLine(left, right string) string {
+	spaceCount := MAX_CHARS_PER_LINE - len(left) - len(right)
+	if spaceCount < 1 {
+		spaceCount = 1 // at least one space if they overflow
+	}
+	spaces := strings.Repeat(" ", spaceCount)
+	return left + spaces + right + "\n"
+}
+
 func printOrder(orderData *models.OrderData) error {
 	f, err := os.OpenFile("/dev/usb/lp0", os.O_RDWR, 0)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer f.Close()
 
@@ -33,18 +66,49 @@ func printOrder(orderData *models.OrderData) error {
 	p := escpos.New(f)
 
 	p.Init()
+	p.SetEmphasize(3)
+	p.SetFontSize(1, 1)
+	p.SetUnderline(2)
 	p.SetAlign("center")
-	p.SetFontSize(2, 3)
-	p.Write("EPICES TACO\n")
+	p.Write("Les Delices de Marie")
+	p.Formfeed()
+	p.SetUnderline(0)
+	p.SetFontSize(3, 4)
+	p.Write("TACO\n")
 	p.SetFontSize(1, 1)
 	p.Write("Tel: +22891541906 / +22879806420\n")
+	p.Write(fmt.Sprintf("%s\n", formatFrenchDate(orderData.IssuedAt)))
+	p.Write(fmt.Sprintf("Commande no %s\n", orderData.ID[:8]))
 	p.FormfeedN(1)
-	p.SetAlign("left") // Left-align for product details
+	p.SetAlign("left")
 
-	p.Write("Product          Qty   Price    Total\n")
-	p.Write("-------------------------------------\n")
-	p.Write("-------------------------------------\n")
+	for _, item := range orderData.OrderItems {
+		total := item.UnitPrice * item.Quantity
 
+		p.Write(fmt.Sprintf("%s (%s)\n", item.ProductName, item.ProductVariant))
+		productData := printLine(
+			fmt.Sprintf("Qte: %d  PU: %d  ", item.Quantity, item.UnitPrice),
+			fmt.Sprintf("Total: %d", total),
+		)
+		p.Write(productData)
+		p.Write("--------------------------------\n")
+	}
+	totalLine := printLine("Total", fmt.Sprintf("%d", orderData.Total))
+	p.Write(totalLine)
+
+	discountLine := printLine(
+		"Remise: ",
+		fmt.Sprintf("%d", orderData.Discount),
+	)
+	p.Write(discountLine)
+	p.Write("--------------------------------\n")
+	totalLine = printLine("Total a payer", fmt.Sprintf("%d", orderData.TotalWithDiscount))
+	p.Write(totalLine)
+
+	p.FormfeedN(2)
+	p.SetAlign("center")
+	p.SetFontSize(2, 3)
+	p.Write("MERCI\n")
 	p.FormfeedN(3)
 	p.End()
 
