@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type Product struct {
 	ID          string `json:"id" db:"id"`
 	Name        string `json:"name" db:"name"`
@@ -11,14 +9,14 @@ type Product struct {
 }
 
 type Order struct {
-	ID                string    `json:"id" db:"id"`
-	IssuedAt          time.Time `json:"issued_at" db:"issued_at"`
-	CustomerName      string    `json:"customer_name" db:"customer_name"`
-	CustomerPhone     string    `json:"customer_phone" db:"customer_phone"`
-	CustomerAddress   string    `json:"customer_address" db:"customer_address"`
-	Discount          int       `json:"discount" db:"discount"`
-	Total             int       `json:"total" db:"total"`
-	TotalWithDiscount int       `json:"total_with_discount" db:"total_with_discount"`
+	ID                string `json:"id" db:"id"`
+	IssuedAt          string `json:"issued_at" db:"issued_at"`
+	CustomerName      string `json:"customer_name" db:"customer_name"`
+	CustomerPhone     string `json:"customer_phone" db:"customer_phone"`
+	CustomerAddress   string `json:"customer_address" db:"customer_address"`
+	Discount          int    `json:"discount" db:"discount"`
+	Total             int    `json:"total" db:"total"`
+	TotalWithDiscount int    `json:"total_with_discount" db:"total_with_discount"`
 }
 
 type OrderItem struct {
@@ -27,6 +25,18 @@ type OrderItem struct {
 	ProductID string `json:"product_id" db:"product_id"`
 	Quantity  int    `json:"quantity" db:"quantity"`
 	UnitPrice int    `json:"unit_price" db:"unit_price"`
+}
+
+type OrderData struct {
+	ID                string      `json:"id" db:"id"`
+	IssuedAt          string      `json:"issued_at" db:"issued_at"`
+	CustomerName      string      `json:"customer_name" db:"customer_name"`
+	CustomerPhone     string      `json:"customer_phone" db:"customer_phone"`
+	CustomerAddress   string      `json:"customer_address" db:"customer_address"`
+	Discount          int         `json:"discount" db:"discount"`
+	Total             int         `json:"total" db:"total"`
+	TotalWithDiscount int         `json:"total_with_discount" db:"total_with_discount"`
+	OrderItems        []OrderItem `json:"order_items"`
 }
 
 type ProductUpdateData struct {

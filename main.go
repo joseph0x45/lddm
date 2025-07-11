@@ -51,6 +51,7 @@ func main() {
 	mux.HandleFunc("GET /api/products", productsHandler.GetAllProducts)
   mux.HandleFunc("POST /api/orders", ordersHandler.SaveOrder)
   mux.HandleFunc("GET /api/orders", ordersHandler.GetAllOrders)
+  mux.HandleFunc("POST /api/orders/print", ordersHandler.Print)
 
 
 	server := http.Server{

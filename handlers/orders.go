@@ -1,14 +1,17 @@
 package handlers
 
 import (
+	"bufio"
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"server/models"
 	"server/repo"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kenshaw/escpos"
 )
 
 type OrderHandler struct {
@@ -17,6 +20,51 @@ type OrderHandler struct {
 
 func NewOrderHandler(orders *repo.OrderRepo) *OrderHandler {
 	return &OrderHandler{orders: orders}
+}
+
+func printOrder(orderData *models.OrderData) error {
+	f, err := os.OpenFile("/dev/usb/lp0", os.O_RDWR, 0)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	p := escpos.New(f)
+
+	p.Init()
+	p.SetAlign("center")
+	p.SetFontSize(2, 3)
+	p.Write("EPICES TACO\n")
+	p.SetFontSize(1, 1)
+	p.Write("Tel: +22891541906 / +22879806420\n")
+	p.FormfeedN(1)
+	p.SetAlign("left") // Left-align for product details
+
+	p.Write("Product          Qty   Price    Total\n")
+	p.Write("-------------------------------------\n")
+
+	for _, item := range orderData.OrderItems {
+		// Format product name to fixed width (e.g., 15 chars)
+		name := item.ProductName
+		if len(name) > 15 {
+			name = name[:15]
+		}
+		// Calculate total for the line
+		lineTotal := item.Quantity * item.UnitPrice
+
+		// Format line (adjust spacing as needed)
+		line := fmt.Sprintf("%-15s %3d %7d %8d\n", name, item.Quantity, item.UnitPrice, lineTotal)
+		p.Write(line)
+	}
+
+	p.Write("-------------------------------------\n")
+
+	p.FormfeedN(3)
+	p.End()
+
+	w.Flush()
+	return nil
 }
 
 func (h *OrderHandler) SaveOrder(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +79,7 @@ func (h *OrderHandler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 			ProductID string `json:"product_id"`
 			Quantity  int    `json:"quantity"`
 			UnitPrice int    `json:"unit_price"`
-    } `json:"order_items"`
+		} `json:"order_items"`
 	}{}
 	err := json.NewDecoder(r.Body).Decode(payload)
 	if err != nil {
@@ -41,7 +89,7 @@ func (h *OrderHandler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	order := &models.Order{
 		ID:                uuid.NewString(),
-		IssuedAt:          time.Now().UTC(),
+		IssuedAt:          time.Now().UTC().String(),
 		CustomerName:      payload.CustomerName,
 		CustomerPhone:     payload.CustomerPhone,
 		CustomerAddress:   payload.CustomerAddress,
@@ -66,7 +114,47 @@ func (h *OrderHandler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("[INFO] Order Created with ID: %s\n", order.ID)
-  w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {}
+func (h *OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {
+	data, err := h.orders.GetOrders()
+	if err != nil {
+		log.Printf("[ERROR] Error while getting orders: %s\n", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Printf("[ERROR] Error while marshalling data: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+
+func (h *OrderHandler) Print(w http.ResponseWriter, r *http.Request) {
+	payload := &struct {
+		OrderID string `json:"order_id"`
+	}{}
+	err := json.NewDecoder(r.Body).Decode(payload)
+	if err != nil {
+		log.Printf("[ERROR] Error while decoding request body: %s\n", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	orderData, err := h.orders.GetOrderByID(payload.OrderID)
+	if err != nil {
+		log.Printf("[ERROR] Error while getting order data: %s\n", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = printOrder(orderData)
+	if err != nil {
+		log.Printf("[ERROR] Error while printing order: %s\n", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}

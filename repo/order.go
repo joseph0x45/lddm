@@ -64,3 +64,39 @@ func (r *OrderRepo) InsertOrder(order *models.Order, orderItems []models.OrderIt
 	}
 	return nil
 }
+
+func (r *OrderRepo) GetOrders() ([]models.OrderData, error) {
+	const getOrdersQuery = "select * from orders"
+	var orders []models.OrderData
+	err := r.db.Select(&orders, getOrdersQuery)
+	if err != nil {
+		return nil, fmt.Errorf("Error while getting orders: %w", err)
+	}
+	const getOrderItemsQuery = "select * from order_items where order_id=?"
+	for i, order := range orders {
+		var items []models.OrderItem
+		err = r.db.Select(&items, getOrderItemsQuery, order.ID)
+		if err != nil {
+			return nil, fmt.Errorf("Error while getting order item: %w", err)
+		}
+		orders[i].OrderItems = items
+	}
+	return orders, err
+}
+
+func (r *OrderRepo) GetOrderByID(id string) (*models.OrderData, error) {
+	order := &models.OrderData{}
+	const getOrderQuery = "select * from orders where id=?"
+	err := r.db.Get(order, getOrderQuery, id)
+	if err != nil {
+		return nil, fmt.Errorf("Error while getting order by id: %w", err)
+	}
+	var orderItems []models.OrderItem
+	const getOrderItemsQuery = "select * from order_items where order_id=?"
+	err = r.db.Select(&orderItems, getOrderItemsQuery, order.ID)
+	if err != nil {
+		return nil, fmt.Errorf("Error while getting order items: %w", err)
+	}
+	order.OrderItems = orderItems
+	return order, nil
+}
