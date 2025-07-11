@@ -17,11 +17,11 @@ func NewProductRepo(db *sqlx.DB) *ProductRepo {
 func (r *ProductRepo) InsertProduct(product *models.Product) error {
 	const query = `
     insert into products (
-      id, name, price,
+      id, name, variant, price,
       image, description
     )
     values (
-      :id, :name, :price,
+      :id, :name, :variant, :price,
       :image, :description
     );
   `

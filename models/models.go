@@ -3,6 +3,7 @@ package models
 type Product struct {
 	ID          string `json:"id" db:"id"`
 	Name        string `json:"name" db:"name"`
+	Variant     string `json:"variant" db:"variant"`
 	Price       int    `json:"price" db:"price"`
 	Image       string `json:"image" db:"image"`
 	Description string `json:"description" db:"description"`
@@ -20,11 +21,13 @@ type Order struct {
 }
 
 type OrderItem struct {
-	ID        string `json:"id" db:"id"`
-	OrderID   string `json:"order_id" db:"order_id"`
-	ProductID string `json:"product_id" db:"product_id"`
-	Quantity  int    `json:"quantity" db:"quantity"`
-	UnitPrice int    `json:"unit_price" db:"unit_price"`
+	ID             string `json:"id" db:"id"`
+	OrderID        string `json:"order_id" db:"order_id"`
+	ProductID      string `json:"product_id" db:"product_id"`
+	ProductName    string `json:"product_name" db:"product_name"`
+	ProductVariant string `json:"product_variant" db:"product_variant"`
+	Quantity       int    `json:"quantity" db:"quantity"`
+	UnitPrice      int    `json:"unit_price" db:"unit_price"`
 }
 
 type OrderData struct {
@@ -41,12 +44,8 @@ type OrderData struct {
 
 type ProductUpdateData struct {
 	Name        string `json:"name"`
+	Variant     string `json:"variant"`
 	Price       int    `json:"price"`
 	Image       string `json:"image"`
 	Description string `json:"description"`
-}
-
-type User struct {
-	Username string `db:"username"`
-	Password string `db:"password"`
 }

@@ -39,7 +39,7 @@
             <template x-for="item in order.order_items" :key="item.id">
               <div class="flex justify-between text-sm border-b py-1">
                 <div>
-                  <p>Product ID: <span x-text="item.product_id"></span></p>
+                  <p>Product: <span x-text="`${item.product_name} (${item.product_variant})`"></span></p>
                 </div>
                 <div>
                   <p>Qty: <span x-text="item.quantity"></span></p>
@@ -66,7 +66,7 @@
     async function print_order_bill(order_id) {
       try {
         const response = await fetch("/api/orders/print", {
-          method:"POST",
+          method: "POST",
           body: JSON.stringify({
             order_id
           })

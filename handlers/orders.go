@@ -43,21 +43,6 @@ func printOrder(orderData *models.OrderData) error {
 
 	p.Write("Product          Qty   Price    Total\n")
 	p.Write("-------------------------------------\n")
-
-	for _, item := range orderData.OrderItems {
-		// Format product name to fixed width (e.g., 15 chars)
-		name := item.ProductName
-		if len(name) > 15 {
-			name = name[:15]
-		}
-		// Calculate total for the line
-		lineTotal := item.Quantity * item.UnitPrice
-
-		// Format line (adjust spacing as needed)
-		line := fmt.Sprintf("%-15s %3d %7d %8d\n", name, item.Quantity, item.UnitPrice, lineTotal)
-		p.Write(line)
-	}
-
 	p.Write("-------------------------------------\n")
 
 	p.FormfeedN(3)
@@ -76,9 +61,11 @@ func (h *OrderHandler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 		Total             int    `json:"total"`
 		TotalWithDiscount int    `json:"total_with_discount"`
 		OrderItems        []struct {
-			ProductID string `json:"product_id"`
-			Quantity  int    `json:"quantity"`
-			UnitPrice int    `json:"unit_price"`
+			ProductID      string `json:"product_id"`
+			ProductName    string `json:"product_name"`
+			ProductVariant string `json:"product_variant"`
+			Quantity       int    `json:"quantity"`
+			UnitPrice      int    `json:"unit_price"`
 		} `json:"order_items"`
 	}{}
 	err := json.NewDecoder(r.Body).Decode(payload)
@@ -100,11 +87,13 @@ func (h *OrderHandler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 	orderItems := make([]models.OrderItem, 0)
 	for _, orderItem := range payload.OrderItems {
 		orderItems = append(orderItems, models.OrderItem{
-			ID:        uuid.NewString(),
-			OrderID:   order.ID,
-			ProductID: orderItem.ProductID,
-			Quantity:  orderItem.Quantity,
-			UnitPrice: orderItem.UnitPrice,
+			ID:             uuid.NewString(),
+			OrderID:        order.ID,
+			ProductID:      orderItem.ProductID,
+			ProductName:    orderItem.ProductName,
+			ProductVariant: orderItem.ProductVariant,
+			Quantity:       orderItem.Quantity,
+			UnitPrice:      orderItem.UnitPrice,
 		})
 	}
 	err = h.orders.InsertOrder(order, orderItems)

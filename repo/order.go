@@ -43,10 +43,12 @@ func (r *OrderRepo) InsertOrder(order *models.Order, orderItems []models.OrderIt
 	const orderItemsQuery = `
     insert into order_items(
       id, order_id, product_id,
+      product_name, product_variant,
       quantity, unit_price
     )
     values (
       :id, :order_id, :product_id,
+      :product_name, :product_variant,
       :quantity, :unit_price
     )
   `

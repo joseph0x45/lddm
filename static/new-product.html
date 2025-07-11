@@ -29,6 +29,16 @@
         </div>
 
         <div>
+          <label class="block mb-1 font-medium">Variant</label>
+          <select x-model="variant" required class="w-full border p-2 rounded">
+            <option value="Mini">Mini</option>
+            <option value="Classique">Essentiel</option>
+            <option value="Moyen">Moyen</option>
+            <option value="Grand">Grand</option>
+          </select>
+        </div>
+
+        <div>
           <label class="block mb-1 font-medium">Price</label>
           <input type="number" x-model.number="price" step="25" min="0" required class="w-full border p-2 rounded" />
         </div>
@@ -59,6 +69,7 @@
     function productForm() {
       return {
         name: '',
+        variant: 'Mini',
         price: 0,
         description: '',
         imageUrl: '',
@@ -66,10 +77,12 @@
         async addProduct() {
           const payload = {
             name: this.name,
+            variant: this.variant,
             price: this.price,
             description: this.description,
             image: this.imageUrl,
           }
+          console.log(payload)
 
           try {
             const res = await fetch('/api/products', {
@@ -87,6 +100,7 @@
 
             alert("Product created successfully!")
             this.name = ""
+            this.variant = ""
             this.price = 0
             this.description = ""
             this.imageUrl = ""
