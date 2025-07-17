@@ -1,0 +1,28 @@
+{{ define "content" }}
+<div class="w-full flex justify-between ">
+  <h1>Products</h1>
+</div>
+{{ range .Data.Products }}
+<div
+  class="my-4 w-full bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200 p-4 flex flex-col justify-between"
+  data-name="{{.Name}}" data-price="{{.Price}}" data-variant="{{.Variant}}" x-data="product_card($el)">
+  <div class="aspect-[4/3] w-full rounded-md overflow-hidden">
+    <img src="{{.Image}}" alt="Product Image" class="w-full h-full object-cover" />
+  </div>
+
+  <div class="mt-4">
+    <h2 class="text-xl font-semibold text-gray-800">{{.Name}} ({{.Variant}})</h2>
+    <p class="text-gray-600 mt-1 text-sm">{{.Description}}</p>
+    <p class="text-lg font-bold text-indigo-600 mt-2">{{.Price}} XOF</p>
+  </div>
+
+  <div class="w-full flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300">−</button>
+      <span class="text-lg font-medium w-6 text-center" >0</span>
+      <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300">+</button>
+    </div>
+  </div>
+</div>
+{{ end }}
+{{ end }}

@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"server/handlers"
-	"server/repo"
+	"server/handler"
+	"server/store"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -16,6 +16,9 @@ import (
 
 //go:embed static/*
 var staticFiles embed.FS
+
+//go:embed templates/*
+var templatesFS embed.FS
 
 func getDBConnection() *sqlx.DB {
 	dbURL := os.Getenv("DB_URL")
@@ -26,7 +29,7 @@ func getDBConnection() *sqlx.DB {
 	if err != nil {
 		panic(err)
 	}
-  log.Println("[INFO] Connected to Database:", dbURL)
+	log.Println("[INFO] Connected to Database:", dbURL)
 	return db
 }
 
@@ -38,21 +41,13 @@ func main() {
 		panic(err)
 	}
 
-	productsRepo := repo.NewProductRepo(db)
-  ordersRepo := repo.NewOrderRepo(db)
-
-	productsHandler := handlers.NewProductHandler(productsRepo)
-  
-  ordersHandler := handlers.NewOrderHandler(ordersRepo)
+	store := store.NewStore(db)
+	handler := handler.NewHandler(store, &templatesFS)
 
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.FS(staticContent)))
-	mux.HandleFunc("POST /api/products", productsHandler.CreateProduct)
-	mux.HandleFunc("GET /api/products", productsHandler.GetAllProducts)
-  mux.HandleFunc("POST /api/orders", ordersHandler.SaveOrder)
-  mux.HandleFunc("GET /api/orders", ordersHandler.GetAllOrders)
-  mux.HandleFunc("POST /api/orders/print", ordersHandler.Print)
-
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticContent))))
+  mux.HandleFunc("GET /home", handler.RenderHomePage)
+  mux.HandleFunc("GET /products", handler.RenderProductsPage)
 
 	server := http.Server{
 		Addr:         ":8080",

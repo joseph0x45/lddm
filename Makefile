@@ -18,4 +18,4 @@ build_release:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/delices_de_marie_backend
 
 tailwind:
-	npx @tailwindcss/cli -i ./static/input.css -o ./static/styles.css --watch
+	tailwindcss -i ./static/input.css -o ./static/styles.css --watch

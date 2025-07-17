@@ -1,4 +1,4 @@
-package repo
+package store
 
 import (
 	"fmt"
@@ -7,16 +7,38 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type OrderRepo struct {
+type Store struct {
 	db *sqlx.DB
 }
 
-func NewOrderRepo(db *sqlx.DB) *OrderRepo {
-	return &OrderRepo{db: db}
+func NewStore(db *sqlx.DB) *Store {
+	return &Store{db: db}
 }
 
-func (r *OrderRepo) InsertOrder(order *models.Order, orderItems []models.OrderItem) error {
-	tx, err := r.db.Beginx()
+func (s *Store) InsertProduct(product *models.Product) error {
+	const query = `
+    insert into products (
+      id, name, variant, price,
+      image, description
+    )
+    values (
+      :id, :name, :variant, :price,
+      :image, :description
+    );
+  `
+	_, err := s.db.NamedExec(query, product)
+	return err
+}
+
+func (s *Store) GetAllProducts() ([]models.Product, error) {
+	products := make([]models.Product, 0)
+	const query = `select * from products`
+	err := s.db.Select(&products, query)
+	return products, err
+}
+
+func (s *Store) InsertOrder(order *models.Order, orderItems []models.OrderItem) error {
+	tx, err := s.db.Beginx()
 	if err != nil {
 		return err
 	}
@@ -67,17 +89,17 @@ func (r *OrderRepo) InsertOrder(order *models.Order, orderItems []models.OrderIt
 	return nil
 }
 
-func (r *OrderRepo) GetOrders() ([]models.OrderData, error) {
+func (s *Store) GetAllOrders() ([]models.OrderData, error) {
 	const getOrdersQuery = "select * from orders"
 	var orders []models.OrderData
-	err := r.db.Select(&orders, getOrdersQuery)
+	err := s.db.Select(&orders, getOrdersQuery)
 	if err != nil {
 		return nil, fmt.Errorf("Error while getting orders: %w", err)
 	}
 	const getOrderItemsQuery = "select * from order_items where order_id=?"
 	for i, order := range orders {
 		var items []models.OrderItem
-		err = r.db.Select(&items, getOrderItemsQuery, order.ID)
+		err = s.db.Select(&items, getOrderItemsQuery, order.ID)
 		if err != nil {
 			return nil, fmt.Errorf("Error while getting order item: %w", err)
 		}
@@ -86,16 +108,16 @@ func (r *OrderRepo) GetOrders() ([]models.OrderData, error) {
 	return orders, err
 }
 
-func (r *OrderRepo) GetOrderByID(id string) (*models.OrderData, error) {
+func (s *Store) GetOrderByID(id string) (*models.OrderData, error) {
 	order := &models.OrderData{}
 	const getOrderQuery = "select * from orders where id=?"
-	err := r.db.Get(order, getOrderQuery, id)
+	err := s.db.Get(order, getOrderQuery, id)
 	if err != nil {
 		return nil, fmt.Errorf("Error while getting order by id: %w", err)
 	}
 	var orderItems []models.OrderItem
 	const getOrderItemsQuery = "select * from order_items where order_id=?"
-	err = r.db.Select(&orderItems, getOrderItemsQuery, order.ID)
+	err = s.db.Select(&orderItems, getOrderItemsQuery, order.ID)
 	if err != nil {
 		return nil, fmt.Errorf("Error while getting order items: %w", err)
 	}

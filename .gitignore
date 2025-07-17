@@ -19,7 +19,6 @@ go.work.sum
 bin/
 *.db
 *.sqlite
-node_modules
 static/styles.css
 static/alpine.js
 tmp/
