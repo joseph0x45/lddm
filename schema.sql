@@ -4,7 +4,8 @@ create table if not exists products (
   variant text not null,
   price integer not null,
   image text not null,
-  description text not null
+  description text not null,
+  in_stock integer not null
 );
 
 create table if not exists orders (

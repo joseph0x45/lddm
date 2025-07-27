@@ -2,15 +2,39 @@ package handler
 
 import (
 	"embed"
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
+	"server/models"
 	"server/store"
+
+	"github.com/google/uuid"
 )
 
+var SIDE_BAR_ITEMS = []map[string]string{
+	{
+		"Text": "Home",
+		"Url":  "/home",
+	},
+	{
+		"Text": "Products",
+		"Url":  "/products",
+	},
+	{
+		"Text": "Orders",
+		"Url":  "/orders",
+	},
+	{
+		"Text": "Stats",
+		"Url":  "/stats",
+	},
+}
+
 type PageData struct {
-	Title string
-	Data  map[string]any
+	Title        string
+	SidebarItems []map[string]string
+	Data         map[string]any
 }
 
 type Handler struct {
@@ -30,7 +54,8 @@ func (h *Handler) RenderHomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data := PageData{
-		Title: "Home",
+		Title:        "Home",
+		SidebarItems: SIDE_BAR_ITEMS,
 	}
 	tmpl.ExecuteTemplate(w, "layout", data)
 }
@@ -47,7 +72,8 @@ func (h *Handler) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data := PageData{
-		Title: "Products",
+		Title:        "Products",
+		SidebarItems: SIDE_BAR_ITEMS,
 		Data: map[string]any{
 			"Products": products,
 		},
@@ -57,4 +83,42 @@ func (h *Handler) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *Handler) RenderOrdersPage(w http.ResponseWriter, r *http.Request) {}
+
+func (h *Handler) RenderStatsPage(w http.ResponseWriter, r *http.Request) {}
+func (h *Handler) RenderCartPage(w http.ResponseWriter, r *http.Request)  {}
+
+func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
+	payload := struct {
+		Name        string `json:"name"`
+		Variant     string `json:"variant"`
+		Price       int    `json:"price"`
+		Description string `json:"description"`
+		Image       string `json:"image"`
+		InStock     int    `json:"in_stock"`
+	}{}
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		log.Println("[ERROR]: Failed to decode JSON: ", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	newProduct := &models.Product{
+		ID:          uuid.NewString(),
+		Name:        payload.Name,
+		Variant:     payload.Variant,
+		Price:       payload.Price,
+		Description: payload.Description,
+		Image:       payload.Image,
+		InStock:     payload.InStock,
+	}
+	err = h.store.InsertProduct(newProduct)
+	if err != nil {
+		log.Println("[ERROR] Error while inserting product: ", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
 }

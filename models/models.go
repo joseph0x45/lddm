@@ -7,6 +7,7 @@ type Product struct {
 	Price       int    `json:"price" db:"price"`
 	Image       string `json:"image" db:"image"`
 	Description string `json:"description" db:"description"`
+	InStock     int    `json:"in_stock" db:"in_stock"`
 }
 
 type Order struct {
@@ -40,12 +41,4 @@ type OrderData struct {
 	Total             int         `json:"total" db:"total"`
 	TotalWithDiscount int         `json:"total_with_discount" db:"total_with_discount"`
 	OrderItems        []OrderItem `json:"order_items"`
-}
-
-type ProductUpdateData struct {
-	Name        string `json:"name"`
-	Variant     string `json:"variant"`
-	Price       int    `json:"price"`
-	Image       string `json:"image"`
-	Description string `json:"description"`
 }

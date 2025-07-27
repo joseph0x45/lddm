@@ -46,8 +46,13 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticContent))))
-  mux.HandleFunc("GET /home", handler.RenderHomePage)
-  mux.HandleFunc("GET /products", handler.RenderProductsPage)
+	mux.HandleFunc("GET /home", handler.RenderHomePage)
+	mux.HandleFunc("GET /products", handler.RenderProductsPage)
+	mux.HandleFunc("GET /orders", handler.RenderOrdersPage)
+	mux.HandleFunc("GET /stats", handler.RenderStatsPage)
+	mux.HandleFunc("GET /cart", handler.RenderCartPage)
+
+	mux.HandleFunc("POST /api/products", handler.CreateProduct)
 
 	server := http.Server{
 		Addr:         ":8080",

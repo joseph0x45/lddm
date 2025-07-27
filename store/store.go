@@ -19,11 +19,11 @@ func (s *Store) InsertProduct(product *models.Product) error {
 	const query = `
     insert into products (
       id, name, variant, price,
-      image, description
+      image, description, in_stock
     )
     values (
       :id, :name, :variant, :price,
-      :image, :description
+      :image, :description, :in_stock
     );
   `
 	_, err := s.db.NamedExec(query, product)
