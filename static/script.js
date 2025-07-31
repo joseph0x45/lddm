@@ -131,6 +131,10 @@ function view_cart_modal() {
       return total
     },
     get subtotal() {
+      if (this.discount >= this.total){
+        this.discount = this.total
+        return 0
+      }
       return this.total - this.discount
     }
 
