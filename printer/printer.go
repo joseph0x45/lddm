@@ -13,13 +13,6 @@ import (
 
 const MAX_CHARS_PER_LINE = 32
 
-type OrderHandler struct {
-}
-
-func NewOrderHandler() *OrderHandler {
-	return &OrderHandler{}
-}
-
 func formatFrenchDate(raw string) string {
 	t, err := time.Parse("2006-01-02 15:04:05.000000000 -0700 MST", raw)
 	if err != nil {
@@ -41,7 +34,7 @@ func formatFrenchDate(raw string) string {
 }
 
 func printLine(left, right string) string {
-  spaceCount := max(MAX_CHARS_PER_LINE-len(left)-len(right), 1)
+	spaceCount := max(MAX_CHARS_PER_LINE-len(left)-len(right), 1)
 	spaces := strings.Repeat(" ", spaceCount)
 	return left + spaces + right + "\n"
 }
