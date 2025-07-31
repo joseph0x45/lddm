@@ -50,9 +50,9 @@ func main() {
 	mux.HandleFunc("GET /products", handler.RenderProductsPage)
 	mux.HandleFunc("GET /orders", handler.RenderOrdersPage)
 	mux.HandleFunc("GET /stats", handler.RenderStatsPage)
-	mux.HandleFunc("GET /cart", handler.RenderCartPage)
 
 	mux.HandleFunc("POST /api/products", handler.CreateProduct)
+  mux.HandleFunc("POST /api/orders", handler.SaveOrder)
 
 	server := http.Server{
 		Addr:         ":8080",

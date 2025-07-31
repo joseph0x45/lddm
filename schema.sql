@@ -16,7 +16,7 @@ create table if not exists orders (
   customer_address text not null,
   discount integer not null,
   total integer not null,
-  total_with_discount integer not null
+  subtotal integer not null
 );
 
 create table if not exists order_items (
@@ -26,5 +26,5 @@ create table if not exists order_items (
   product_name text not null,
   product_variant text not null,
   quantity integer not null,
-  unit_price integer not null
+  price integer not null
 );

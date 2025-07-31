@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"server/models"
 	"server/store"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -85,10 +86,10 @@ func (h *Handler) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) RenderOrdersPage(w http.ResponseWriter, r *http.Request) {}
+func (h *Handler) RenderOrdersPage(w http.ResponseWriter, r *http.Request) {
+}
 
 func (h *Handler) RenderStatsPage(w http.ResponseWriter, r *http.Request) {}
-func (h *Handler) RenderCartPage(w http.ResponseWriter, r *http.Request)  {}
 
 func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	payload := struct {
@@ -117,6 +118,61 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	err = h.store.InsertProduct(newProduct)
 	if err != nil {
 		log.Println("[ERROR] Error while inserting product: ", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *Handler) SaveOrder(w http.ResponseWriter, r *http.Request) {
+	type saveOrderPayload struct {
+		CustomerName    string `json:"customer_name"`
+		CustomerPhone   string `json:"customer_phone"`
+		CustomerAddress string `json:"customer_address"`
+		Discount        int    `json:"discount"`
+		Total           int    `json:"total"`
+		SubTotal        int    `json:"subtotal"`
+		Products        []struct {
+			ID       string `json:"id"`
+			Name     string `json:"name"`
+			Price    int    `json:"price"`
+			Quantity int    `json:"quantity"`
+			Variant  string `json:"variant"`
+		}
+	}
+	payload := saveOrderPayload{}
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		log.Println("[ERROR] Error while saving order: ", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	newOrder := models.Order{
+		ID:              uuid.NewString(),
+		IssuedAt:        time.Now().UTC().String(),
+		CustomerName:    payload.CustomerName,
+		CustomerPhone:   payload.CustomerPhone,
+		CustomerAddress: payload.CustomerAddress,
+		Discount:        payload.Discount,
+		Total:           payload.Total,
+		SubTotal:        payload.SubTotal,
+	}
+	orderItems := make([]models.OrderItem, 0)
+	for _, product := range payload.Products {
+		newOrderItem := models.OrderItem{
+			ID:             uuid.NewString(),
+			OrderID:        newOrder.ID,
+			ProductID:      product.ID,
+			ProductName:    product.Name,
+			ProductVariant: product.Variant,
+			Price:      product.Price,
+			Quantity:       product.Quantity,
+		}
+		orderItems = append(orderItems, newOrderItem)
+	}
+	err = h.store.InsertOrder(&newOrder, orderItems)
+	if err != nil {
+		log.Println("[ERROR] Error while saving order: ", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -16,8 +16,8 @@ function product_card() {
         id: dataset.id,
         name: dataset.name,
         variant: dataset.variant,
-        price: dataset.price,
-        quantity: this.quantity
+        price: parseInt(dataset.price),
+        quantity: parseInt(this.quantity)
       }
       this.$store.cart[current_product.id] = current_product
     },
@@ -35,8 +35,8 @@ function product_card() {
         id: dataset.id,
         name: dataset.name,
         variant: dataset.variant,
-        price: dataset.price,
-        quantity: this.quantity
+        price: parseInt(dataset.price),
+        quantity: parseInt(this.quantity)
       }
       this.$store.cart[current_product.id] = current_product
     }
@@ -131,11 +131,42 @@ function view_cart_modal() {
       return total
     },
     get subtotal() {
-      if (this.discount >= this.total){
+      if (this.discount >= this.total) {
         this.discount = this.total
         return 0
       }
       return this.total - this.discount
+    },
+    async submit_order() {
+      try {
+        const response = await fetch(
+          "/api/orders",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              "customer_name": this.customer_name,
+              "customer_address": this.customer_address,
+              "customer_phone": this.customer_phone,
+              "discount": parseInt(this.discount),
+              "total": this.total,
+              "subtotal": this.subtotal,
+              "products": this.get_cart_data()
+            })
+          }
+        )
+        if (response.status != 201) {
+          const error_message = await response.text()
+          throw Error(error_message)
+        }
+        alert('Order saved successfully')
+        this.customer_name = ""
+        this.customer_phone = ""
+        this.customer_address = ""
+        this.discount = "0"
+        this.$store.cart = {}
+      } catch (error) {
+        alert(`Error while saving order: ${error}`)
+      }
     }
 
   }

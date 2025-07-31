@@ -46,12 +46,12 @@ func (s *Store) InsertOrder(order *models.Order, orderItems []models.OrderItem) 
     insert into orders(
       id, issued_at, customer_name, customer_phone,
       customer_address, discount, total,
-      total_with_discount
+      subtotal
     )
     values(
       :id, :issued_at, :customer_name, :customer_phone,
       :customer_address, :discount, :total,
-      :total_with_discount
+      :subtotal
     )
   `
 	_, err = tx.NamedExec(orderQuery, order)
@@ -66,12 +66,12 @@ func (s *Store) InsertOrder(order *models.Order, orderItems []models.OrderItem) 
     insert into order_items(
       id, order_id, product_id,
       product_name, product_variant,
-      quantity, unit_price
+      quantity, price
     )
     values (
       :id, :order_id, :product_id,
       :product_name, :product_variant,
-      :quantity, :unit_price
+      :quantity, :price
     )
   `
 	_, err = tx.NamedExec(orderItemsQuery, orderItems)
