@@ -87,6 +87,20 @@ func (h *Handler) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) RenderOrdersPage(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFS(h.templatesFS, "templates/layouts/main_layout.html", "templates/orders.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	data := &PageData{
+		Title:        "Orders",
+		SidebarItems: SIDE_BAR_ITEMS,
+	}
+	err = tmpl.ExecuteTemplate(w, "layout", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *Handler) RenderStatsPage(w http.ResponseWriter, r *http.Request) {}
@@ -165,7 +179,7 @@ func (h *Handler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 			ProductID:      product.ID,
 			ProductName:    product.Name,
 			ProductVariant: product.Variant,
-			Price:      product.Price,
+			Price:          product.Price,
 			Quantity:       product.Quantity,
 		}
 		orderItems = append(orderItems, newOrderItem)

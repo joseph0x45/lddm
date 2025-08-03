@@ -52,7 +52,7 @@ func main() {
 	mux.HandleFunc("GET /stats", handler.RenderStatsPage)
 
 	mux.HandleFunc("POST /api/products", handler.CreateProduct)
-  mux.HandleFunc("POST /api/orders", handler.SaveOrder)
+	mux.HandleFunc("POST /api/orders", handler.SaveOrder)
 
 	server := http.Server{
 		Addr:         ":8080",
@@ -61,7 +61,7 @@ func main() {
 		WriteTimeout: time.Minute,
 	}
 
-	log.Println("[INFO] Server listening on port 8080")
+  log.Println("[INFO] Server listening on port 8080\nVisit http://0.0.0.0:8080/home")
 	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}
