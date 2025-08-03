@@ -1,7 +1,83 @@
 {{define "content" }}
-<section>
-  <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-    <h1>Hello</h1>
+
+<div class="max-w-4xl mx-auto p-4 space-y-6" x-data="order_list_page()">
+  {{ range .Data.Orders }}
+  <div data-id="{{.ID}}" class="bg-white shadow rounded-lg p-4 space-y-4" x-data="{ open: false }">
+    <div class="space-y-2">
+      <div class="flex justify-between text-sm sm:text-base">
+        <span class="text-gray-500">Order:</span>
+        <span class="font-medium truncate max-w-[150px]" title="{{ .ID }}">#{{ .ID }}</span>
+      </div>
+      <div class="flex justify-between text-sm sm:text-base">
+        <span class="text-gray-500">Issued at:</span>
+        <span class="font-medium">{{ .IssuedAt }}</span>
+      </div>
+      <div class="flex justify-between text-sm sm:text-base">
+        <span class="text-gray-500">Customer:</span>
+        <span class="font-medium">{{ .CustomerName }}</span>
+      </div>
+      <div class="flex justify-between text-sm sm:text-base">
+        <span class="text-gray-500">Phone:</span>
+        <span class="font-medium">{{ .CustomerPhone }}</span>
+      </div>
+      <div class="flex justify-between text-sm sm:text-base">
+        <span class="text-gray-500">Address:</span>
+        <span class="font-medium">{{ .CustomerAddress }}</span>
+      </div>
+      <div class="flex justify-between text-sm sm:text-base">
+        <span class="text-gray-500">Subtotal:</span>
+        <span class="font-medium">{{ .SubTotal }} CFA</span>
+      </div>
+      <div class="flex justify-between text-sm sm:text-base">
+        <span class="text-gray-500">Discount:</span>
+        <span class="font-medium">{{ .Discount }} CFA</span>
+      </div>
+      <div class="flex justify-between text-sm sm:text-base">
+        <span class="text-gray-500">Total:</span>
+        <span class="font-bold text-green-700">{{ .Total }} CFA</span>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2 pt-2">
+      <button class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+        @click="delete_order()">
+        Delete Order
+      </button>
+      <button class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+        @click="print_order()">
+        Print
+      </button>
+    </div>
+
+    <button @click="open = !open" class="text-blue-600 text-sm font-medium underline mt-2">
+      <span x-text="open ? 'Hide Items' : 'Show Items'"></span>
+    </button>
+
+    <div class="border-t pt-4 space-y-3" x-show="open" x-collapse>
+      {{ range .OrderItems }}
+      <div class="p-3 bg-gray-50 rounded-lg space-y-1">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Product:</span>
+          <span class="font-medium">{{ .ProductName }}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Variant:</span>
+          <span class="font-medium">{{ .ProductVariant }}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Quantity:</span>
+          <span class="font-medium">{{ .Quantity }}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Price:</span>
+          <span class="font-medium">{{ .Price }} CFA</span>
+        </div>
+      </div>
+      {{ end }}
+    </div>
   </div>
-</section>
+  {{ end }}
+</div>
+
+
 {{end}}

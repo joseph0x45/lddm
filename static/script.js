@@ -171,3 +171,43 @@ function view_cart_modal() {
 
   }
 }
+
+function order_list_page() {
+  return {
+    async delete_order() {
+      try {
+        const dataset = this.$root.dataset
+        const response = await fetch(
+          `/api/orders/${dataset.id}`,
+          {
+            method: "DELETE"
+          }
+        )
+        if (response.status != 200) {
+          const error_message = await response.text()
+          throw Error(error_message)
+        }
+        alert('Order deleted successfully')
+        window.location.reload()
+      } catch (error) {
+        alert(`Error while deleting order: ${error}`)
+      }
+    },
+
+    async print_order() {
+      try {
+        const dataset = this.$root.dataset
+        const response = await fetch(
+          `/api/orders/${dataset.id}/print`
+        )
+        if (response.status != 200) {
+          const error_message = await response.text()
+          throw Error(error_message)
+        }
+        alert('Order printed!')
+      } catch (error) {
+        alert(`Error while printing order: ${error}`)
+      }
+    }
+  }
+}

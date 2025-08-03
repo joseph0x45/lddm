@@ -21,7 +21,7 @@ create table if not exists orders (
 
 create table if not exists order_items (
   id text not null primary key,
-  order_id text not null references orders(id),
+  order_id text not null references orders(id) on delete cascade,
   product_id text not null references products(id),
   product_name text not null,
   product_variant text not null,

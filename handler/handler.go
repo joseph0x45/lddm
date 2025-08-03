@@ -92,9 +92,18 @@ func (h *Handler) RenderOrdersPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	ordersData, err := h.store.GetAllOrders()
+	if err != nil {
+		log.Println("[ERROR]: Failed to get orders data: ", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	data := &PageData{
 		Title:        "Orders",
 		SidebarItems: SIDE_BAR_ITEMS,
+		Data: map[string]any{
+			"Orders": ordersData,
+		},
 	}
 	err = tmpl.ExecuteTemplate(w, "layout", data)
 	if err != nil {
@@ -163,7 +172,7 @@ func (h *Handler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	newOrder := models.Order{
 		ID:              uuid.NewString(),
-		IssuedAt:        time.Now().UTC().String(),
+		IssuedAt:        time.Now().UTC().Format("02 Jan 2006, 03:04 PM"),
 		CustomerName:    payload.CustomerName,
 		CustomerPhone:   payload.CustomerPhone,
 		CustomerAddress: payload.CustomerAddress,
@@ -191,4 +200,19 @@ func (h *Handler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *Handler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
+	orderID := r.PathValue("id")
+	err := h.store.DeleteOrderByID(orderID)
+	if err != nil {
+		log.Println("[ERROR] Error while deleting order: ", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+    return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) PrintOrder(w http.ResponseWriter, r *http.Request) {
+  w.WriteHeader(http.StatusOK)
 }

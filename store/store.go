@@ -16,6 +16,10 @@ func NewStore(db *sqlx.DB) *Store {
 }
 
 func (s *Store) InsertProduct(product *models.Product) error {
+	_, err := s.db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		return err
+	}
 	const query = `
     insert into products (
       id, name, variant, price,
@@ -26,7 +30,7 @@ func (s *Store) InsertProduct(product *models.Product) error {
       :image, :description, :in_stock
     );
   `
-	_, err := s.db.NamedExec(query, product)
+	_, err = s.db.NamedExec(query, product)
 	return err
 }
 
@@ -38,6 +42,10 @@ func (s *Store) GetAllProducts() ([]models.Product, error) {
 }
 
 func (s *Store) InsertOrder(order *models.Order, orderItems []models.OrderItem) error {
+	_, err := s.db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		return err
+	}
 	tx, err := s.db.Beginx()
 	if err != nil {
 		return err
@@ -123,4 +131,19 @@ func (s *Store) GetOrderByID(id string) (*models.OrderData, error) {
 	}
 	order.OrderItems = orderItems
 	return order, nil
+}
+
+func (s *Store) DeleteOrderByID(id string) error {
+	_, err := s.db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		return err
+	}
+	query := `
+    delete from orders where id=?
+  `
+	_, err = s.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
