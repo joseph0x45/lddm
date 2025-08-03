@@ -6,32 +6,11 @@ import (
 	"os"
 	"server/models"
 	"strings"
-	"time"
 
 	"github.com/kenshaw/escpos"
 )
 
 const MAX_CHARS_PER_LINE = 32
-
-func formatFrenchDate(raw string) string {
-	t, err := time.Parse("2006-01-02 15:04:05.000000000 -0700 MST", raw)
-	if err != nil {
-		return "Date invalide"
-	}
-
-	months := [...]string{
-		"janvier", "fevrier", "mars", "avril", "mai", "juin",
-		"juillet", "aout", "septembre", "octobre", "novembre", "decembre",
-	}
-
-	day := t.Day()
-	month := months[t.Month()-1]
-	year := t.Year()
-	hour := t.Hour()
-	minute := t.Minute()
-
-	return fmt.Sprintf("%d %s %d a %02d:%02d", day, month, year, hour, minute)
-}
 
 func printLine(left, right string) string {
 	spaceCount := max(MAX_CHARS_PER_LINE-len(left)-len(right), 1)
@@ -59,7 +38,7 @@ func PrintOrder(orderData *models.OrderData) error {
 	p.Write("TACO\n")
 	p.SetFontSize(1, 1)
 	p.Write("Tel: +22891541906 / +22879806420\n")
-	p.Write(fmt.Sprintf("%s\n", formatFrenchDate(orderData.IssuedAt)))
+	p.Write(fmt.Sprintf("%s\n", orderData.IssuedAt))
 	p.Write(fmt.Sprintf("Commande no %s\n", orderData.ID[:8]))
 	p.FormfeedN(1)
 	p.SetAlign("left")

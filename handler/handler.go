@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"server/models"
+	"server/printer"
 	"server/store"
 	"time"
 
@@ -172,7 +173,7 @@ func (h *Handler) SaveOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	newOrder := models.Order{
 		ID:              uuid.NewString(),
-		IssuedAt:        time.Now().UTC().Format("02 Jan 2006, 03:04 PM"),
+		IssuedAt:        time.Now().UTC().Format("02/01/2006 15:04"),
 		CustomerName:    payload.CustomerName,
 		CustomerPhone:   payload.CustomerPhone,
 		CustomerAddress: payload.CustomerAddress,
@@ -208,11 +209,19 @@ func (h *Handler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("[ERROR] Error while deleting order: ", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-    return
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) PrintOrder(w http.ResponseWriter, r *http.Request) {
-  w.WriteHeader(http.StatusOK)
+	orderID := r.PathValue("id")
+	orderData, err := h.store.GetOrderByID(orderID)
+	err = printer.PrintOrder(orderData)
+	if err != nil {
+		log.Println("[ERROR] Error while printing order: ", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
