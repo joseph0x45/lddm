@@ -12,14 +12,22 @@ import (
 
 const MAX_CHARS_PER_LINE = 32
 
+type Printer struct {
+	port string
+}
+
+func NewPrinter(port string) *Printer {
+	return &Printer{port: port}
+}
+
 func printLine(left, right string) string {
 	spaceCount := max(MAX_CHARS_PER_LINE-len(left)-len(right), 1)
 	spaces := strings.Repeat(" ", spaceCount)
 	return left + spaces + right + "\n"
 }
 
-func PrintOrder(orderData *models.OrderData) error {
-	f, err := os.OpenFile("/dev/usb/lp0", os.O_RDWR, 0)
+func (pr *Printer) PrintOrder(orderData *models.OrderData) error {
+	f, err := os.OpenFile(pr.port, os.O_RDWR, 0)
 	if err != nil {
 		return err
 	}

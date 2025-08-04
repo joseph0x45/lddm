@@ -35,6 +35,7 @@ func getDBConnection() *sqlx.DB {
 
 func main() {
 	db := getDBConnection()
+	printerPort := os.Getenv("PRINTER")
 	staticContent, err := fs.Sub(staticFiles, "static")
 	if err != nil {
 		log.Println("[ERROR] Error while loading static files")
@@ -42,7 +43,7 @@ func main() {
 	}
 
 	store := store.NewStore(db)
-	handler := handler.NewHandler(store, &templatesFS)
+	handler := handler.NewHandler(store, &templatesFS, printerPort)
 
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticContent))))
@@ -53,8 +54,8 @@ func main() {
 
 	mux.HandleFunc("POST /api/products", handler.CreateProduct)
 	mux.HandleFunc("POST /api/orders", handler.SaveOrder)
-  mux.HandleFunc("DELETE /api/orders/{id}", handler.DeleteOrder)
-  mux.HandleFunc("GET /api/orders/{id}/print", handler.PrintOrder)
+	mux.HandleFunc("DELETE /api/orders/{id}", handler.DeleteOrder)
+	mux.HandleFunc("GET /api/orders/{id}/print", handler.PrintOrder)
 
 	server := http.Server{
 		Addr:         ":8080",
@@ -63,7 +64,7 @@ func main() {
 		WriteTimeout: time.Minute,
 	}
 
-  log.Println("[INFO] Server listening on port 8080\nVisit http://0.0.0.0:8080/home")
+	log.Println("[INFO] Server listening on port 8080\nVisit http://0.0.0.0:8080/home")
 	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}

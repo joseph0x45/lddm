@@ -42,10 +42,14 @@ type PageData struct {
 type Handler struct {
 	store       *store.Store
 	templatesFS *embed.FS
+	printerPort string
 }
 
-func NewHandler(store *store.Store, templatesFS *embed.FS) *Handler {
-	return &Handler{store: store, templatesFS: templatesFS}
+func NewHandler(
+	store *store.Store, templatesFS *embed.FS,
+	printerPort string,
+) *Handler {
+	return &Handler{store: store, templatesFS: templatesFS, printerPort: printerPort}
 }
 
 func (h *Handler) RenderHomePage(w http.ResponseWriter, r *http.Request) {
@@ -217,7 +221,8 @@ func (h *Handler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) PrintOrder(w http.ResponseWriter, r *http.Request) {
 	orderID := r.PathValue("id")
 	orderData, err := h.store.GetOrderByID(orderID)
-	err = printer.PrintOrder(orderData)
+	printerDevice := printer.NewPrinter(h.printerPort)
+	err = printerDevice.PrintOrder(orderData)
 	if err != nil {
 		log.Println("[ERROR] Error while printing order: ", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
