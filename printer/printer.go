@@ -48,6 +48,15 @@ func (pr *Printer) PrintOrder(orderData *models.OrderData) error {
 	p.Write("Tel: +22891541906 / +22879806420\n")
 	p.Write(fmt.Sprintf("%s\n", orderData.IssuedAt))
 	p.Write(fmt.Sprintf("Commande no %s\n", orderData.ID[:8]))
+	if orderData.CustomerName != "" {
+		p.Write(fmt.Sprintf("Client: %s\n", orderData.CustomerName))
+	}
+	if orderData.CustomerPhone != "" {
+		p.Write(fmt.Sprintf("Tel: %s\n", orderData.CustomerPhone))
+	}
+	if orderData.CustomerAddress != "" {
+		p.Write(fmt.Sprintf("Adresse: %s\n", orderData.CustomerAddress))
+	}
 	p.FormfeedN(1)
 	p.SetAlign("left")
 
