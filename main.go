@@ -36,6 +36,7 @@ func getDBConnection() *sqlx.DB {
 func main() {
 	db := getDBConnection()
 	printerPort := os.Getenv("PRINTER")
+  log.Printf("Using %s as printer port\n", printerPort)
 	staticContent, err := fs.Sub(staticFiles, "static")
 	if err != nil {
 		log.Println("[ERROR] Error while loading static files")
