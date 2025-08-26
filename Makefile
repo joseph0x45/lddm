@@ -1,7 +1,7 @@
 DB=db.sqlite
 
 build:
-	go build -o bin/server .
+	go build -o server.out .
 
 refresh_db:
 	rm $(DB)
@@ -9,7 +9,6 @@ refresh_db:
 
 migrate:
 	sqlite3 $(DB) < ./schema.sql
-
 
 launch:
 	export DB_URL="$(DB)" && ./bin/server

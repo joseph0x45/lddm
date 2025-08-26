@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"server/db"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -10,6 +11,9 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
+	conn := db.NewDBConnection("db.sqlite")
+	conn.Migrate()
+	conn.SeedGroups()
 
 	server := http.Server{
 		Addr:         ":8080",
