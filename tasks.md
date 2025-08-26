@@ -1,0 +1,2 @@
+- [ ] Nuke existing codebase
+- [ ] Design new database architecture
