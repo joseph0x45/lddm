@@ -4,7 +4,6 @@ import (
 	"embed"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"io/fs"
 	"log"
@@ -83,11 +82,10 @@ func main() {
 	skipRefreshFlag := flag.Bool("skip-refresh", false, "Skip fetching data from GitHub")
 	flag.Parse()
 	data := setupData(*skipRefreshFlag)
-	fmt.Printf("%+v\n", data)
 
 	conn := db.NewDBConnection("db.sqlite")
 
-	handler := handler.NewHandler(conn, uiFS)
+	handler := handler.NewHandler(conn, uiFS, data)
 
 	staticContent, err := fs.Sub(staticFiles, "static")
 	if err != nil {
@@ -99,7 +97,7 @@ func main() {
 	mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.FS(staticContent))))
 	mux.HandleFunc("GET /home", handler.RenderHomePage)
 
-	mux.HandleFunc("GET /api/groups", handler.FetchGroups)
+	mux.HandleFunc("GET /api/data", handler.GetData)
 
 	server := http.Server{
 		Addr:         ":8080",

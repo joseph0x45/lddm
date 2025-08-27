@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"server/db"
+	"server/types"
 )
 
 type PageData struct {
@@ -15,12 +16,14 @@ type PageData struct {
 type Handler struct {
 	conn *db.DBConnection
 	uiFS embed.FS
+	data *types.Data
 }
 
-func NewHandler(conn *db.DBConnection, uiFS embed.FS) *Handler {
+func NewHandler(conn *db.DBConnection, uiFS embed.FS, data *types.Data) *Handler {
 	return &Handler{
 		conn: conn,
 		uiFS: uiFS,
+		data: data,
 	}
 }
 

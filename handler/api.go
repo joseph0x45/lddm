@@ -6,16 +6,10 @@ import (
 	"net/http"
 )
 
-func (h *Handler) FetchGroups(w http.ResponseWriter, r *http.Request) {
-	groups, err := h.conn.FetchGroups()
+func (h *Handler) GetData(w http.ResponseWriter, r*http.Request){
+	data, err := json.Marshal(h.data)
 	if err != nil {
-		log.Println("[ERROR]: failed to fetch groups: ", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	data, err := json.Marshal(groups)
-	if err != nil {
-		log.Println("[ERROR]: failed to fetch groups: ", err.Error())
+		log.Println("[ERROR]: failed to fetch data: ", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

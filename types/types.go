@@ -15,7 +15,7 @@ type Group struct {
 
 type Product struct {
 	ID        string `json:"id"`
-	GroupID   string `json:"group_id"`
+	Group     string `json:"group"`
 	Name      string `json:"name"`
 	Variant   string `json:"variant"`
 	Picture   string `json:"picture"`

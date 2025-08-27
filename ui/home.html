@@ -9,14 +9,48 @@
   </div>
 
   <!-- Groups -->
-  <div class="flex flex-wrap gap-4 ">
+  <div class="flex gap-4 overflow-x-auto">
     <template x-for="group in filteredGroups" :key="group.id">
-      <button class="w-32 bg-white rounded shadow p-2 flex flex-col items-center">
-        <img :src="group.picture" alt="group.name" class="w-20 h-20 object-cover rounded-full mb-2">
-        <span x-text="group.name" class="text-center font-semibold"></span>
+      <button @click="selectGroup(group.id)" class="w-32 flex-shrink-0 bg-white rounded shadow p-2 flex flex-col items-center">
+        <div class="w-20 h-20 mb-2">
+          <img :src="group.picture" alt="" class="w-full h-full object-cover rounded-full">
+        </div>
+        <div class="text-center text-sm font-semibold w-full">
+          <span x-text="group.name" class="truncate block"></span>
+        </div>
       </button>
     </template>
   </div>
 
-</div>
-{{ end }}
+  <!-- Products -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+    <template x-for="product in filteredProducts" :key="product.id">
+      <div class="bg-white rounded shadow p-4 flex flex-col items-center">
+        <img :src="product.picture" :alt="product.name" class="w-24 h-24 object-cover rounded mb-3">
+
+        <div class="text-center mb-2">
+          <span x-text="product.name" class="block font-semibold"></span>
+          <span x-text="product.variant" class="text-sm text-gray-500"></span>
+        </div>
+
+        <span x-text="product.base_price.toString() + ' FCFA'" class="font-bold text-green-600 mb-3"></span>
+
+        <div class="flex items-center gap-3">
+          <button class="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center"
+            @click="alert('clicked haha')">
+            –
+          </button>
+
+          <span x-text="product.qty || 0" class="w-6 text-center font-semibold"></span>
+
+          <button class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center"
+            @click="alert('clicked haha')">
+            +
+          </button>
+        </div>
+      </div>
+    </template>
+  </div>
+
+
+  {{ end }}
