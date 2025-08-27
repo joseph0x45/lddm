@@ -2,27 +2,32 @@ package types
 
 import "time"
 
+type Data struct {
+	Groups   []Group   `json:"groups"`
+	Products []Product `json:"products"`
+}
+
 type Group struct {
-	ID      string `json:"id" db:"id"`
-	Name    string `json:"name" db:"name"`
-	Picture string `json:"picture" db:"picture"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Picture string `json:"picture"`
 }
 
 type Product struct {
-	ID        string `json:"id" db:"id"`
-	GroupID   string `json:"group_id" db:"group_id"`
-	Name      string `json:"name" db:"name"`
-	Variant   string `json:"variant" db:"variant"`
-	Picture   string `json:"picture" db:"picture"`
-	InStock   int    `json:"in_stock" db:"in_stock"`
-	BasePrice int    `json:"base_price" db:"base_price"`
+	ID        string `json:"id"`
+	GroupID   string `json:"group_id"`
+	Name      string `json:"name"`
+	Variant   string `json:"variant"`
+	Picture   string `json:"picture"`
+	InStock   int    `json:"in_stock"`
+	BasePrice int    `json:"base_price"`
 }
 
 type ProductBundlePrices struct {
-	ID          string `json:"id" db:"id"`
-	ProductID   string `json:"product_id" db:"product_id"`
-	Quantity    int    `json:"quantity" db:"quantity"`
-	BundlePrice int    `json:"bundle_price" db:"bundle_price"`
+	ID          string `json:"id"`
+	ProductID   string `json:"product_id"`
+	Quantity    int    `json:"quantity"`
+	BundlePrice int    `json:"bundle_price"`
 }
 
 type Order struct {

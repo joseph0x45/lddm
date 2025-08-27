@@ -2,6 +2,9 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
+	"flag"
+	"fmt"
 	"io"
 	"io/fs"
 	"log"
@@ -9,6 +12,7 @@ import (
 	"os"
 	"server/db"
 	"server/handler"
+	"server/types"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -22,49 +26,66 @@ var uiFS embed.FS
 
 const dataJSONURL = "https://joseph0x45.github.io/mom_business_data/data.json"
 
-func setupData() {
-  log.Println("[INFO]: Initializing data")
-	req, err := http.NewRequest(
-		"GET",
-		dataJSONURL,
-		nil,
-	)
+func setupData(skipRefresh bool) *types.Data {
+	log.Println("[INFO]: Initializing data")
+	if !skipRefresh {
+		log.Println("[INFO]: Fetching data")
+		req, err := http.NewRequest(
+			"GET",
+			dataJSONURL,
+			nil,
+		)
+		if err != nil {
+			log.Panicf("[ERROR]: Failed to create HTTP request: %s\n", err.Error())
+		}
+		client := http.Client{
+			Timeout: time.Minute,
+		}
+		response, err := client.Do(req)
+		if err != nil {
+			log.Panicf("[ERROR]: Failed to send HTTP request: %s\n", err.Error())
+		}
+		if response.StatusCode != 200 {
+			log.Panicf("[ERROR]: Expected HTTP 200 got: %d\n", response.StatusCode)
+		}
+		jsonData, err := io.ReadAll(response.Body)
+		if err != nil {
+			log.Panicf("[ERROR]: Failed to read response body: %s\n", err.Error())
+		}
+		jsonFile, err := os.Create("./data.json")
+		if err != nil {
+			log.Panicf("[ERROR]: Failed to create data file: %s\n", err.Error())
+		}
+		_, err = jsonFile.Write(jsonData)
+		if err != nil {
+			log.Panicf("[ERROR]: Failed to write data to JSON file : %s\n", err.Error())
+		}
+		log.Println("[INFO]: Done!")
+	}
+	//read from file, parse and return
+	jsonFile, err := os.Open("./data.json")
 	if err != nil {
-		log.Panicf("[ERROR]: Failed to create HTTP request: %s\n", err.Error())
+		log.Panicf("[ERROR]: Failed to open data file: %s\n", err)
 	}
-	client := http.Client{
-		Timeout: time.Minute,
-	}
-	response, err := client.Do(req)
+	jsonData, err := io.ReadAll(jsonFile)
 	if err != nil {
-		log.Panicf("[ERROR]: Failed to send HTTP request: %s\n", err.Error())
+		log.Panicf("[ERROR]: Failed to read data file: %s\n", err)
 	}
-	if response.StatusCode != 200 {
-		log.Panicf("[ERROR]: Expected HTTP 200 got: %d\n", response.StatusCode)
-	}
-	jsonData, err := io.ReadAll(response.Body)
+	data := &types.Data{}
+	err = json.Unmarshal(jsonData, data)
 	if err != nil {
-		log.Panicf("[ERROR]: Failed to read response body: %s\n", err.Error())
+		log.Panicf("[ERROR]: Failed to parse JSON data: %s\n", err)
 	}
-	// write json to file
-	jsonFile, err := os.Create("./data.json")
-	if err != nil {
-		log.Panicf("[ERROR]: Failed to create data file: %s\n", err.Error())
-	}
-	_, err = jsonFile.Write(jsonData)
-	if err != nil {
-		log.Panicf("[ERROR]: Failed to write data to JSON file : %s\n", err.Error())
-	}
-  log.Println("[INFO]: Done!")
+	return data
 }
 
 func main() {
-	setupData()
-  return
+	skipRefreshFlag := flag.Bool("skip-refresh", false, "Skip fetching data from GitHub")
+	flag.Parse()
+	data := setupData(*skipRefreshFlag)
+	fmt.Printf("%+v\n", data)
 
 	conn := db.NewDBConnection("db.sqlite")
-	conn.Migrate()
-	conn.SeedData()
 
 	handler := handler.NewHandler(conn, uiFS)
 
