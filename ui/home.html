@@ -11,7 +11,10 @@
   <!-- Groups -->
   <div class="flex gap-4 overflow-x-auto">
     <template x-for="group in filteredGroups" :key="group.id">
-      <button @click="selectGroup(group.id)" class="w-32 flex-shrink-0 bg-white rounded shadow p-2 flex flex-col items-center">
+      <button @click="selectGroup(group.id)"
+        class="w-32 flex-shrink-0 rounded shadow p-2 flex flex-col items-center transition" :class="group.id === selectedGroup 
+        ? 'bg-green-100 ring-2 ring-green-500' 
+        : 'bg-white'">
         <div class="w-20 h-20 mb-2">
           <img :src="group.picture" alt="" class="w-full h-full object-cover rounded-full">
         </div>
