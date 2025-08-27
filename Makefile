@@ -10,15 +10,17 @@ refresh_db:
 launch:
 	export DB_URL="$(DB)" && ./bin/server
 
+setup_tailwind:
+	echo '@import "tailwindcss";' >> ./static/input.css
+
 tailwind:
-	echo '@import "tailwindcss";' >> ./ui/input.css
-	tailwindcss -i ./ui/input.css -o ./ui/styles.css
+	tailwindcss -i ./static/input.css -o ./static/styles.css
 
 watch_tailwind:
-	tailwindcss -i ./ui/input.css -o ./ui/styles.css --watch
+	tailwindcss -i ./static/input.css -o ./static/styles.css --watch
 
 alpine:
-	curl https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js > ./ui/alpine.js
+	curl https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js > ./static/alpine.js
 
 setup:
 	$(MAKE) tailwind

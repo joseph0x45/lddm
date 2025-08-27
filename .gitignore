@@ -22,3 +22,4 @@ bin/
 static/styles.css
 static/alpine.js
 tmp/
+data.json
